@@ -32,35 +32,41 @@ const Checkout = () => {
 
   const total = itemsTotal + deliveryCharge;
 
- const placeOrder = async () => {
-  const res = await loadRazorpay();
-  if (!res) {
+ const handlePayment = async () => {
+  const isLoaded = await loadRazorpay();
+  if (!isLoaded) {
     alert("Razorpay SDK failed to load");
     return;
   }
+  // 1️⃣ call YOUR backend
+  const res = await fetch("http://localhost:5000/api/payment/create-order", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ amount: total }),
 
+  });
+
+  const order = await res.json();
+
+  // 2️⃣ open Razorpay UI
   const options = {
-    key: "rzp_test_S6XEeZWcm2X3ct,Madn5WTI3TTy0jBHIPnmBA2n", // 🔑 TERA KEY
-    amount: total * 100,
+    key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+    amount: order.amount,
     currency: "INR",
+    order_id: order.id,
     name: "HyperDrop",
-    description: "Order Payment",
     handler: function (response) {
-      alert("Payment successful 🎉");
+  console.log("SUCCESS", response);
+  localStorage.removeItem("cart");
+  // ✅ payment ke baad HOME
+  navigate("/Home");
+},
 
-      localStorage.removeItem("cart");
-      localStorage.removeItem("checkout");
-
-      navigate("/home");
-    },
-    theme: {
-      color: "#16a34a",
-    },
   };
 
-  const paymentObject = new window.Razorpay(options);
-  paymentObject.open();
+  new window.Razorpay(options).open();
 };
+
 
 
   return (
@@ -178,11 +184,12 @@ const Checkout = () => {
 
             {/* PLACE ORDER */}
             <button
-              onClick={placeOrder}
-              className="w-full bg-green-600 text-white py-4 rounded-2xl font-semibold text-lg"
-            >
-              Place Order • ₹{total}
-            </button>
+  onClick={handlePayment}
+  className="w-full bg-green-600 text-white py-4 rounded-2xl font-semibold text-lg"
+>
+  Place Order • ₹{total}
+</button>
+
           </div>
         </div>
       )}
