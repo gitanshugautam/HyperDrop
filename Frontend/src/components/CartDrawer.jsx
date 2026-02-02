@@ -8,7 +8,7 @@ const itemsTotal = cartItems.reduce(
 const navigate = useNavigate();
 
 const deliveryCharge =
-  itemsTotal >= 199 ? 0 : itemsTotal > 0 ? 25 : 0;
+  itemsTotal >= 199 ? 0 : itemsTotal > 0 ? 60 : 0;
 
 const handlingCharge = itemsTotal > 0 ? 2 : 0;
 const smallCartCharge = itemsTotal > 0 && itemsTotal < 99 ? 20 : 0;
@@ -44,7 +44,7 @@ const updateQty = (id, delta) => {
       {/* Drawer */}
       <div className="
         fixed top-0 right-0 h-full w-[360px]
-        bg-white z-50 shadow-xl
+        bg-[#f7fce9] z-50 shadow-xl
         flex flex-col
         animate-slideIn
       ">

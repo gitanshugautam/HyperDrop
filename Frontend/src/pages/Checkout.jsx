@@ -57,9 +57,27 @@ const Checkout = () => {
     name: "HyperDrop",
     handler: function (response) {
   console.log("SUCCESS", response);
+
+  const oldOrders =
+  JSON.parse(localStorage.getItem("orders")) || [];
+
+const newOrder = {
+  id: response.razorpay_payment_id,
+  items,
+  amount: total,
+  date: new Date().toISOString(),
+};
+
+localStorage.setItem(
+  "orders",
+  JSON.stringify([newOrder, ...oldOrders])
+);
+
   localStorage.removeItem("cart");
+
+  alert("🎉 Order placed successfully!");
   // ✅ payment ke baad HOME
-  navigate("/Home");
+  navigate("/Orders");
 },
 
   };

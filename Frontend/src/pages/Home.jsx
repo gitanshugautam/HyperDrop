@@ -106,7 +106,7 @@ useEffect(() => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#f7fce9]">
       {/* ===== TOAST ===== */}
       {toast && (
         <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
