@@ -25,10 +25,10 @@ router.post("/signup", async (req, res) => {
     });
 
     const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+  { id: user._id, isAdmin: user.isAdmin },
+  process.env.JWT_SECRET,
+  { expiresIn: "7d" }
+);
 
     res.status(201).json({
       message: "Signup successful",
@@ -46,10 +46,34 @@ router.post("/signup", async (req, res) => {
 
 /* ================= LOGIN ================= */
 router.post("/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
 
-const user = await User.findOne({ mobile: email });
+  const { mobile, password, loginAsAdmin } = req.body;
+
+// ✅ ENV ADMIN LOGIN
+if (
+  loginAsAdmin &&
+  mobile === process.env.ADMIN_MOBILE &&
+  password === process.env.ADMIN_PASSWORD
+) {
+  const token = jwt.sign(
+    { id: "ADMIN_ENV", isAdmin: true },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+
+  return res.json({
+    token,
+    user: {
+      _id: "ADMIN_ENV",
+      name: "Admin",
+      mobile,
+      isAdmin: true,
+    },
+  });
+}
+
+  try {
+    const user = await User.findOne({ mobile });
 
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
@@ -67,14 +91,16 @@ const user = await User.findOne({ mobile: email });
     );
 
     res.json({
-      message: "Login successful",
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-      },
-    });
+  message: "Login successful",
+  token,
+  user: {
+    _id: user._id,
+    name: user.name,
+    mobile: user.mobile,
+    isAdmin: user.isAdmin || false,
+  },
+});
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

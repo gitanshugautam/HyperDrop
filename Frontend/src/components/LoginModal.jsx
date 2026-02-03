@@ -6,20 +6,32 @@ import googleLogo from "../assets/google.png";
 const LoginModal = ({ onClose, openSignup }) => {   // ✅ ONLY CHANGE
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState(""); // logic SAME
+  const [mobile, setMobile] = useState("");
+ // logic SAME
   const [password, setPassword] = useState("");
+  
 
-  const handleLogin = async () => {
+  const handleLogin = async (isAdmin = false) => {
+
     try {
-      const res = await API.post("/auth/login", {
-        email,
-        password,
-      });
+  const res = await API.post("/auth/login", {
+  mobile,
+  password,
+  loginAsAdmin: isAdmin,
+});
+
+
 
       localStorage.setItem("token", res.data.token);
 localStorage.setItem("user", JSON.stringify(res.data.user));
 onClose();
-window.location.reload();
+
+if (res.data.user.isAdmin) {
+  navigate("/admin");
+} else {
+  navigate("/home");
+}
+
 
     } catch (err) {
       alert(err.response?.data?.message || "Login failed");
@@ -65,7 +77,7 @@ window.location.reload();
           <input
             type="tel"
             placeholder="Enter mobile number"
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setMobile(e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-4 py-2.5 mb-4
                        bg-gray-50 outline-none
                        focus:ring-2 focus:ring-[#0C831F]"
@@ -85,13 +97,22 @@ window.location.reload();
           />
 
           {/* LOGIN */}
-          <button
-            onClick={handleLogin}
+          <button onClick={() => handleLogin(false)}
             className="w-full bg-[#0C831F] text-white py-2.5 rounded-lg
                        font-semibold hover:bg-[#0A6E1A] transition"
           >
             Continue
           </button>
+
+
+<button onClick={() => handleLogin(true)}
+
+  className="w-full mt-2 border border-[#0C831F] text-[#0C831F]
+             py-2.5 rounded-lg font-semibold hover:bg-green-50 transition"
+>
+  Login as Admin
+</button>
+
 
           {/* OR */}
           <div className="flex items-center my-4 text-gray-300 text-xs">

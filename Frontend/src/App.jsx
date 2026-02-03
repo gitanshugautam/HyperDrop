@@ -5,13 +5,18 @@ import Login from "./pages/login";
 import Signup from "./pages/Signup";
 import GoogleSuccess from "./pages/GoogleSuccess";
 import Products from "./pages/Products";
-import Admin from "./pages/Admin";
-
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Orders from "./pages/Orders";
 import Profile from "./pages/Profile";
 import { getUserLocation, reverseGeocode } from "./utils/location";
+import SavedAddresses from "./pages/SavedAddresses";
+import EditAddress from "./pages/EditAddress";
+import AdminPanel from "./pages/AdminPanel";
+import AdminProductForm from "./pages/AdminProductForm";
+
+
+
 
 function App() {
   useEffect(() => {
@@ -41,12 +46,19 @@ function App() {
         <Route path="/google-success" element={<GoogleSuccess />} />
 
         <Route path="/products" element={<Products />} />
-        <Route path="/admin" element={<Admin />} />
 
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/saved-addresses" element={<SavedAddresses />} />
+        <Route path="/edit-address/:id" element={<EditAddress />} />
+        <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/admin/add" element={<AdminProductForm />} />
+        <Route path="/admin/edit/:id" element={<AdminProductForm />} />
+
+
+
       </Routes>
     </BrowserRouter>
   );

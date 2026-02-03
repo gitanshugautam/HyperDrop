@@ -9,6 +9,7 @@ const Header = ({ cartCount, cartBounce, onCartClick }) => {
   const [showSignup, setShowSignup] = useState(false); // ✅ ADD
   const [openProfile, setOpenProfile] = useState(false);
   const profileRef = useRef(null);
+const user = JSON.parse(localStorage.getItem("user"));
 
   // ✅ LOCATION STATE (AUTO ONLY)
   const [location, setLocation] = useState(null);
@@ -99,10 +100,14 @@ const Header = ({ cartCount, cartBounce, onCartClick }) => {
           </button>
         ) : (
           <div className="relative" ref={profileRef}>
-            <button
-              onClick={() => setOpenProfile(!openProfile)}
-              className="flex flex-col items-center justify-center"
-            >
+           <button
+  onClick={(e) => {
+    e.stopPropagation();
+    setOpenProfile(prev => !prev);
+  }}
+  className="flex flex-col items-center justify-center"
+>
+
               <div className="flex items-center justify-center w-9 h-9 rounded-full bg-white text-green-700 border hover:bg-green-50 transition">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -120,33 +125,46 @@ const Header = ({ cartCount, cartBounce, onCartClick }) => {
             </button>
 
             {openProfile && (
-              <div className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden">
-                <div className="px-4 py-3 border-b">
-                  <p className="font-semibold text-gray-900">Rishi</p>
-                  <p className="text-sm text-gray-500">rishi@email.com</p>
-                </div>
+  <div
+    className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden"
+    onClick={(e) => e.stopPropagation()}
+  >
 
-                <div className="py-2 text-sm">
-                  <button
-                    onClick={() => {
-                      navigate("/orders");
-                      setOpenProfile(false);
-                    }}
-                    className="w-full px-4 py-2 text-left hover:bg-gray-100"
-                  >
-                    📦 My Orders
-                  </button>
+          <div className="px-4 py-3 border-b">
+  <p className="font-semibold text-gray-900">
+  {user?.name}
+</p>
+<p className="text-sm text-gray-500">
+  {user?.mobile}
+</p>
 
-                  <button
-                    onClick={() => {
-                      navigate("/profile");
-                      setOpenProfile(false);
-                    }}
-                    className="w-full px-4 py-2 text-left hover:bg-gray-100"
-                  >
-                    👤 My Profile
-                  </button>
-                </div>
+</div>
+
+
+<div className="py-2 text-sm">
+  {/* MY ORDERS */}
+  <button
+    onClick={() => {
+      navigate("/orders");
+      setOpenProfile(false);
+    }}
+    className="w-full px-4 py-2 text-left hover:bg-gray-100"
+  >
+    📦 My Orders
+  </button>
+
+  {/* SAVED ADDRESSES */}
+  <button
+    onClick={() => {
+      navigate("/saved-addresses");
+      setOpenProfile(false);
+    }}
+    className="w-full px-4 py-2 text-left hover:bg-gray-100"
+  >
+    📍 Saved Addresses
+  </button>
+</div>
+
 
                 <div className="border-t">
                   <button
