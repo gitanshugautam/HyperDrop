@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema(
 
     mobile: {
       type: String,
+      unique: true,
       required: function () {
         return !this.googleId; // ✅ normal signup me required
       },
@@ -16,8 +17,7 @@ const userSchema = new mongoose.Schema(
 
     email: {
       type: String,
-      required: true,
-      unique: true,
+
     },
 
     password: {

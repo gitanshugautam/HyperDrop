@@ -9,9 +9,9 @@ const router = express.Router();
 /* ================= SIGNUP ================= */
 router.post("/signup", async (req, res) => {
   try {
-    const { name, mobile, email, password } = req.body;
+    const { name, mobile, password } = req.body;
 
-    const userExists = await User.findOne({ email });
+    const userExists = await User.findOne({ mobile });
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
     }
@@ -21,7 +21,6 @@ router.post("/signup", async (req, res) => {
     const user = await User.create({
       name,
       mobile,
-      email,
       password: hashedPassword,
     });
 
@@ -37,7 +36,7 @@ router.post("/signup", async (req, res) => {
       user: {
         id: user._id,
         name: user.name,
-        email: user.email,
+        mobile: user.mobile,
       },
     });
   } catch (error) {
@@ -50,7 +49,8 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+const user = await User.findOne({ mobile: email });
+
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
@@ -69,7 +69,6 @@ router.post("/login", async (req, res) => {
     res.json({
       message: "Login successful",
       token,
-       user,
       user: {
         id: user._id,
         name: user.name,
@@ -89,7 +88,7 @@ router.get(
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-// Step 2: Google callback (FINAL FIX)
+// Step 2: Google callback
 router.get(
   "/google/callback",
   passport.authenticate("google", {
@@ -97,20 +96,16 @@ router.get(
     failureRedirect: "http://localhost:5173/login",
   }),
   (req, res) => {
-    // 🔴 SAFETY CHECK
     if (!req.user || !req.user.token) {
-      console.log("❌ GOOGLE CALLBACK: TOKEN MISSING");
       return res.redirect("http://localhost:5173/login");
     }
 
     const token = req.user.token;
 
-    // 🔥 VERY IMPORTANT: return
     return res.redirect(
       `http://localhost:5173/google-success?token=${token}`
     );
   }
 );
-
 
 module.exports = router;
