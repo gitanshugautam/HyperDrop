@@ -21,7 +21,7 @@ const Login = () => {
 
       // 🔑 TOKEN SAVE (YE PEHLE BHI THA)
       localStorage.setItem("token", res.data.token);
-
+    localStorage.setItem("user", JSON.stringify(res.data.user));
       // ✅ SIRF YE FIX: HOME PAGE
       navigate("/home", { replace: true });
     } catch (err) {

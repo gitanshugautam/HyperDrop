@@ -5,6 +5,7 @@ const passport = require("passport");
 
 const connectDB = require("./config/db");
 const productRoutes = require("./routes/productRoutes");
+const addressRoutes = require("./routes/addressRoutes");
 // 👇 PASSPORT STRATEGY LOAD (VERY IMPORTANT)
 require("./config/passport");
 
@@ -25,6 +26,7 @@ app.use("/api/products", require("./routes/productRoutes"));
 app.use("/api/products", productRoutes);
 app.use("/api/products", require("./routes/productRoutes"));
 app.use("/api/payment", require("./routes/paymentRoutes"));
+app.use("/api/address", addressRoutes);
 
 app.get("/", (req, res) => {
   res.send("API running");

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import AddressOverlay from "../components/AddressOverlay";
 
 const loadRazorpay = () => {
   return new Promise((resolve) => {
@@ -14,82 +15,106 @@ const loadRazorpay = () => {
 const Checkout = () => {
   const navigate = useNavigate();
   const [items, setItems] = useState([]);
+  const [showAddress, setShowAddress] = useState(false);
 
   useEffect(() => {
-   const checkoutItems =
-  JSON.parse(localStorage.getItem("cart")) || [];
-
+    const checkoutItems =
+      JSON.parse(localStorage.getItem("cart")) || [];
     setItems(checkoutItems);
   }, []);
 
-  // 💰 PRICE LOGIC (UNCHANGED)
   const itemsTotal = items.reduce(
     (sum, item) => sum + item.price * item.qty,
     0
   );
 
   const deliveryCharge = itemsTotal >= 199 ? 0 : 60;
-
   const total = itemsTotal + deliveryCharge;
 
- const handlePayment = async () => {
-  const isLoaded = await loadRazorpay();
-  if (!isLoaded) {
-    alert("Razorpay SDK failed to load");
-    return;
-  }
-  // 1️⃣ call YOUR backend
-  const res = await fetch("http://localhost:5000/api/payment/create-order", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ amount: total }),
-
-  });
-
-  const order = await res.json();
-
-  // 2️⃣ open Razorpay UI
-  const options = {
-    key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-    amount: order.amount,
-    currency: "INR",
-    order_id: order.id,
-    name: "HyperDrop",
-    handler: function (response) {
-  console.log("SUCCESS", response);
-
-  const oldOrders =
-  JSON.parse(localStorage.getItem("orders")) || [];
-
-const newOrder = {
-  id: response.razorpay_payment_id,
-  items,
-  amount: total,
-  date: new Date().toISOString(),
-};
-
-localStorage.setItem(
-  "orders",
-  JSON.stringify([newOrder, ...oldOrders])
-);
-
-  localStorage.removeItem("cart");
-
-  alert("🎉 Order placed successfully!");
-  // ✅ payment ke baad HOME
-  navigate("/Orders");
-},
-
+  const handlePlaceOrder = () => {
+    setShowAddress(true);
   };
 
-  new window.Razorpay(options).open();
-};
+  // 👉 ADDRESS SAVE → PAYMENT
+  const handleAddressSave = async (address) => {
+    console.log("ADDRESS RECEIVED 👉", address);
 
+    localStorage.setItem(
+      "deliveryAddress",
+      JSON.stringify(address)
+    );
 
+    await fetch("http://localhost:5000/api/address/save", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({
+        flat: address.flat,
+        floor: address.floor,
+        area: address.area,
+        name: address.name,
+        mobile: address.mobile,
+      }),
+    });
+
+    setShowAddress(false);
+    handlePayment();
+  };
+
+  const handlePayment = async () => {
+    const isLoaded = await loadRazorpay();
+    if (!isLoaded) {
+      alert("Razorpay SDK failed to load");
+      return;
+    }
+
+    const res = await fetch(
+      "http://localhost:5000/api/payment/create-order",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: total }),
+      }
+    );
+
+    const order = await res.json();
+
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+      amount: order.amount,
+      currency: "INR",
+      order_id: order.id,
+      name: "HyperDrop",
+      handler: function (response) {
+        const oldOrders =
+          JSON.parse(localStorage.getItem("orders")) ||
+          [];
+
+        const newOrder = {
+          id: response.razorpay_payment_id,
+          items,
+          amount: total,
+          date: new Date().toISOString(),
+        };
+
+        localStorage.setItem(
+          "orders",
+          JSON.stringify([newOrder, ...oldOrders])
+        );
+
+        localStorage.removeItem("cart");
+        alert("🎉 Order placed successfully!");
+        navigate("/Orders");
+      },
+    };
+
+    new window.Razorpay(options).open();
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-6">
-      {/* HEADER */}
       <div className="max-w-4xl mx-auto flex items-center gap-4 mb-6">
         <button
           onClick={() => navigate(-1)}
@@ -116,11 +141,7 @@ localStorage.setItem(
         </div>
       ) : (
         <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-
-          {/* LEFT SIDE */}
           <div className="md:col-span-2 space-y-6">
-
-            {/* ITEMS */}
             <div className="bg-white rounded-2xl p-6 shadow-sm">
               <h2 className="text-lg font-semibold mb-4">
                 Order items
@@ -147,7 +168,6 @@ localStorage.setItem(
               ))}
             </div>
 
-            {/* DELIVERY INFO */}
             <div className="bg-white rounded-2xl p-6 shadow-sm">
               <p className="font-semibold text-gray-900">
                 🚚 Delivery in 15–20 minutes
@@ -158,10 +178,7 @@ localStorage.setItem(
             </div>
           </div>
 
-          {/* RIGHT SIDE */}
           <div className="space-y-4">
-
-            {/* BILL DETAILS */}
             <div className="bg-white rounded-2xl p-6 shadow-sm text-sm space-y-3">
               <h2 className="font-semibold text-gray-900">
                 Bill details
@@ -188,11 +205,11 @@ localStorage.setItem(
               </div>
 
               {itemsTotal < 199 && (
-  <p className="text-xs text-gray-500">
-    Add items worth ₹{199 - itemsTotal} more for FREE delivery
-  </p>
-)}
-
+                <p className="text-xs text-gray-500">
+                  Add items worth ₹{199 - itemsTotal} more
+                  for FREE delivery
+                </p>
+              )}
 
               <div className="flex justify-between font-semibold border-t pt-3 text-base">
                 <span>Total</span>
@@ -200,16 +217,26 @@ localStorage.setItem(
               </div>
             </div>
 
-            {/* PLACE ORDER */}
             <button
-  onClick={handlePayment}
-  className="w-full bg-green-600 text-white py-4 rounded-2xl font-semibold text-lg"
->
-  Place Order • ₹{total}
-</button>
-
+              onClick={handlePlaceOrder}
+              className="w-full bg-green-600 text-white py-4 rounded-2xl font-semibold text-lg"
+            >
+              Place Order • ₹{total}
+            </button>
           </div>
         </div>
+      )}
+
+      {showAddress && (
+        <AddressOverlay
+          open={showAddress}
+          onClose={() => setShowAddress(false)}
+          onSave={handleAddressSave}
+          autoArea={
+            JSON.parse(localStorage.getItem("location"))?.city ||
+            ""
+          }
+        />
       )}
     </div>
   );
