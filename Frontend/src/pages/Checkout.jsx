@@ -87,27 +87,45 @@ const Checkout = () => {
       currency: "INR",
       order_id: order.id,
       name: "HyperDrop",
-      handler: function (response) {
-        const oldOrders =
-          JSON.parse(localStorage.getItem("orders")) ||
-          [];
+      handler: async function (response) {
+  try {
+    const address = JSON.parse(
+      localStorage.getItem("deliveryAddress")
+    );
 
-        const newOrder = {
-          id: response.razorpay_payment_id,
-          items,
-          amount: total,
-          date: new Date().toISOString(),
-        };
+    const res = await fetch(
+      "http://localhost:5000/api/orders/create",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+  user: JSON.parse(localStorage.getItem("user"))?._id,
+  items: items,
+  totalAmount: total,
+  paymentId: response.razorpay_payment_id,
+  paymentMethod: "Online",
+  address: address,
+}),
 
-        localStorage.setItem(
-          "orders",
-          JSON.stringify([newOrder, ...oldOrders])
-        );
+      }
+    );
 
-        localStorage.removeItem("cart");
-        alert("🎉 Order placed successfully!");
-        navigate("/Orders");
-      },
+    const data = await res.json();
+    console.log("ORDER API RESPONSE 👉", data);
+
+    localStorage.removeItem("cart");
+    localStorage.removeItem("deliveryAddress");
+
+    alert("🎉 Order placed successfully!");
+    navigate("/Orders");
+  } catch (err) {
+    console.error("ORDER SAVE ERROR ❌", err);
+    alert("Order save failed");
+  }
+},
+
     };
 
     new window.Razorpay(options).open();

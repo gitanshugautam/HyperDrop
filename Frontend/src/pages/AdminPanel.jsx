@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+
 const AdminPanel = () => {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
@@ -29,7 +30,11 @@ const AdminPanel = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f7fce8] p-8">
+  <div className="min-h-screen bg-[#f7fce8]">
+   
+
+    <div className="p-8">
+
       <div className="max-w-6xl mx-auto">
 
         <div className="flex justify-between items-center mb-6">
@@ -74,6 +79,7 @@ const AdminPanel = () => {
         </div>
 
       </div>
+    </div>
     </div>
   );
 };

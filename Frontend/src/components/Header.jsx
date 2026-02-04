@@ -1,23 +1,41 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import LoginModal from "./LoginModal";
-import SignupModal from "./SignupModal";   // ✅ ADD
+import SignupModal from "./SignupModal";
 
-const Header = ({ cartCount, cartBounce, onCartClick }) => {
+const Header = ({
+  cartCount,
+  cartBounce,
+  onCartClick,
+  onSearch,
+  setSearchResults
+}) => {
+
+
   const navigate = useNavigate();
   const [showLogin, setShowLogin] = useState(false);
-  const [showSignup, setShowSignup] = useState(false); // ✅ ADD
+  const [showSignup, setShowSignup] = useState(false);
   const [openProfile, setOpenProfile] = useState(false);
   const profileRef = useRef(null);
-const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem("user"));
 
-  // ✅ LOCATION STATE (AUTO ONLY)
   const [location, setLocation] = useState(null);
+  const [search, setSearch] = useState("");
+  const [results, setResults] = useState([]);
+
+
+  useEffect(() => {
+  const handler = (e) => setResults(e.detail);
+  window.addEventListener("searchResults", handler);
+  return () =>
+    window.removeEventListener("searchResults", handler);
+}, []);
+
+
 
   useEffect(() => {
     const loadLocation = () => {
       const loc = JSON.parse(localStorage.getItem("location"));
-
       if (
         loc &&
         typeof loc.city === "string" &&
@@ -32,32 +50,26 @@ const user = JSON.parse(localStorage.getItem("user"));
 
     loadLocation();
     window.addEventListener("locationUpdated", loadLocation);
-
     return () =>
       window.removeEventListener("locationUpdated", loadLocation);
   }, []);
 
-  // outside click close
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (profileRef.current && !profileRef.current.contains(e.target)) {
         setOpenProfile(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () =>
       document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // login state
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
   useEffect(() => {
     const loggedIn =
       !!localStorage.getItem("token") ||
       !!localStorage.getItem("user");
-
     setIsLoggedIn(loggedIn);
   }, []);
 
@@ -82,13 +94,62 @@ const user = JSON.parse(localStorage.getItem("user"));
 
         <div className="h-6 w-[1px] bg-black opacity-30 mx-3" />
 
-        <input
-          type="text"
-          placeholder="Search for products"
-          className="flex-1 px-5 py-2.5 rounded-xl bg-[#f1f1f1] focus:outline-none"
+       <input
+  type="text"
+  placeholder="Search for products"
+  className="flex-1 px-5 py-2.5 rounded-xl bg-[#f1f1f1] focus:outline-none"
+  value={search}
+  onChange={(e) => {
+    const val = e.target.value;
+    setSearch(val);
+    onSearch(val);
+    setSearchResults(val);
+
+    window.dispatchEvent(
+  new CustomEvent("searchQuery", { detail: val })
+);
+
+    if (!val) setResults([]);
+  }}
+/>
+{search && results.length > 0 && (
+  <div className="absolute top-[72px] left-1/2 -translate-x-1/2 w-[600px] bg-white border rounded-xl shadow-lg z-50 max-h-80 overflow-y-auto">
+    {results.map((item) => (
+      <div
+        key={item._id}
+        onClick={() => {
+          document.getElementById(item._id)?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+          setResults([]);
+          setSearch("");
+        }}
+        className="px-4 py-3 cursor-pointer hover:bg-gray-100 flex gap-3 items-center"
+      >
+        <img
+          src={item.image}
+          alt={item.name}
+          className="w-10 h-10 object-contain"
         />
+        <div>
+          <p className="text-sm font-medium text-gray-900">
+            {item.name}
+          </p>
+          <p className="text-xs text-gray-500">
+            {item.category} • {item.brand}
+          </p>
+        </div>
+      </div>
+    ))}
+  </div>
+)}
+
 
         <div className="h-6 w-[1px] bg-black opacity-30 mx-3" />
+
+        {/* rest SAME — untouched */}
+
 
         {/* RIGHT SIDE – LOGIN / PROFILE */}
         {!isLoggedIn ? (

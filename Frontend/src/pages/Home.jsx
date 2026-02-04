@@ -30,6 +30,24 @@ const Home = () => {
   const [cartCount, setCartCount] = useState(0);
   const [cartBounce, setCartBounce] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+
+
+
+
+
+
+  const filteredProducts = products.filter((item) => {
+  const q = searchQuery.toLowerCase();
+  return (
+    item.name?.toLowerCase().includes(q) ||
+    item.category?.toLowerCase().includes(q) ||
+    item.brand?.toLowerCase().includes(q)
+  );
+});
+
+
 
   // 🔐 AUTH GUARD
   useEffect(() => {
@@ -115,11 +133,30 @@ useEffect(() => {
           </div>
         </div>
       )}
- <Header
+<Header
   cartCount={cartCount}
   cartBounce={cartBounce}
   onCartClick={() => setCartOpen(true)}
+  onSearch={setSearchQuery}
+  setSearchResults={(q) =>
+    setTimeout(() => {
+      const r = products
+        .filter((item) =>
+          item.name.toLowerCase().includes(q.toLowerCase()) ||
+          item.category.toLowerCase().includes(q.toLowerCase()) ||
+          item.brand.toLowerCase().includes(q.toLowerCase())
+        )
+        .slice(0, 6);
+
+      window.dispatchEvent(
+        new CustomEvent("searchResults", { detail: r })
+      );
+    }, 0)
+  }
 />
+
+
+
 
 
 
@@ -153,7 +190,8 @@ useEffect(() => {
                max-md:grid-cols-2
                max-sm:grid-cols-1"
   >
-    {products.map((item) => (
+    {filteredProducts.map((item) => (
+
       <div
         key={item._id}
         className="

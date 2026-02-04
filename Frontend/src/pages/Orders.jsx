@@ -7,11 +7,26 @@ const Orders = () => {
   const [openOrderId, setOpenOrderId] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const data =
-      JSON.parse(localStorage.getItem("orders")) || [];
-    setOrders(data);
-  }, []);
+useEffect(() => {
+  const fetchOrders = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user?._id) return;
+
+      const res = await fetch(
+        `http://localhost:5000/api/orders/my/${user._id}`
+      );
+
+      const data = await res.json();
+      setOrders(data);
+    } catch (err) {
+      console.error("FETCH ORDERS ERROR ❌", err);
+    }
+  };
+
+  fetchOrders();
+}, []);
+
 
   if (orders.length === 0) {
     return (

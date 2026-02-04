@@ -28,6 +28,9 @@ app.use("/api/products", require("./routes/productRoutes"));
 app.use("/api/payment", require("./routes/paymentRoutes"));
 app.use("/api/address", addressRoutes);
 app.use("/api/products", require("./routes/productRoutes"));
+app.use("/api/admin", require("./routes/adminRoutes"));
+app.use("/api/users", require("./routes/userRoutes"));
+app.use("/api/orders", require("./routes/orderRoutes"));
 
 app.get("/", (req, res) => {
   res.send("API running");

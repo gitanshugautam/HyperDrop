@@ -19,11 +19,28 @@ const AdminProductForm = () => {
   });
 
   useEffect(() => {
-    if (!id) return;
-    axios
-      .get(`http://localhost:5000/api/products/${id}`)
-      .then((res) => setForm(res.data));
-  }, [id]);
+  if (!id) return;
+
+  axios
+    .get(`http://localhost:5000/api/products/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((res) => {
+      setForm({
+        name: res.data.name || "",
+        category: res.data.category || "",
+        brand: res.data.brand || "",
+        price: res.data.price || "",
+        unit: res.data.unit || "",
+        description: res.data.description || "",
+        image: res.data.image || "",
+        inStock: res.data.inStock ?? true,
+      });
+    });
+}, [id]);
+
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -70,11 +87,12 @@ const AdminProductForm = () => {
               <label className="block text-xs font-semibold text-gray-600 mb-1 capitalize">
                 {f}
               </label>
-              <input
-                name={f}
-                value={form[f]}
-                onChange={handleChange}
-                placeholder={`Enter ${f}`}
+             <input
+  type={f === "price" ? "number" : "text"}
+  name={f}
+  value={form[f]}
+  onChange={handleChange}
+  placeholder={`Enter ${f}`}
                 className="w-full border border-gray-300 rounded-lg px-4 py-2
                            bg-gray-50 outline-none
                            focus:ring-2 focus:ring-green-600"
