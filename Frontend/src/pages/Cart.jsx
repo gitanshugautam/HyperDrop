@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
   const navigate = useNavigate();
+
+  
   const [cart, setCart] = useState([]);
 
   useEffect(() => {

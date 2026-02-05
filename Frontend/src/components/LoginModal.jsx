@@ -24,6 +24,13 @@ const LoginModal = ({ onClose, openSignup }) => {   // ✅ ONLY CHANGE
 
       localStorage.setItem("token", res.data.token);
 localStorage.setItem("user", JSON.stringify(res.data.user));
+
+// ✅ ADD THIS (cart fetch)
+const cartRes = await API.get(`/cart/${res.data.user._id}`);
+window.dispatchEvent(
+  new CustomEvent("cartUpdate", { detail: cartRes.data })
+);
+
 onClose();
 
 if (res.data.user.isAdmin) {

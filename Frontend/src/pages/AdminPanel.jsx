@@ -41,7 +41,7 @@ const AdminPanel = () => {
           <h1 className="text-2xl font-bold">Admin Panel</h1>
           <button
             onClick={() => navigate("/admin/add")}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg"
+            className="bg-green-600 text-white px-4 py-2 rounded-lg mt-[100px]"
           >
             + Add Product
           </button>

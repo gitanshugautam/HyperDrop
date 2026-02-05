@@ -6,6 +6,7 @@ const passport = require("passport");
 const connectDB = require("./config/db");
 const productRoutes = require("./routes/productRoutes");
 const addressRoutes = require("./routes/addressRoutes");
+const cartRoutes = require("./routes/cartRoutes");
 // 👇 PASSPORT STRATEGY LOAD (VERY IMPORTANT)
 require("./config/passport");
 
@@ -32,6 +33,7 @@ app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/orders", require("./routes/orderRoutes"));
 
+app.use("/api/cart", cartRoutes);
 app.get("/", (req, res) => {
   res.send("API running");
 });
